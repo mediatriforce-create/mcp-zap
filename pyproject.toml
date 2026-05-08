@@ -1,0 +1,16 @@
+[project]
+name = "evolution-api-mcp"
+version = "1.0.0"
+description = "MCP server for WhatsApp via Evolution API"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp[code-mode]>=3.1.0",
+    "pydantic-monty==0.0.7",
+    "httpx>=0.28.0",
+]
+
+[project.scripts]
+evolution-api-mcp = "evolution_api_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/evolution_api_mcp"]
