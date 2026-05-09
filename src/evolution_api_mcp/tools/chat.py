@@ -12,23 +12,49 @@ async def find_contact(instance_name: str, name: str) -> dict:
         instance_name: Name of the connected instance
         name: Full or partial name to search (case-insensitive)
     """
-    chats = await get_client().get(f"chat/findChats/{instance_name}")
-    if not isinstance(chats, list):
-        return {"error": "Could not fetch chats"}
+    # Try contacts store endpoint first (requires STORE_CONTACTS=true)
+    try:
+        contacts = await get_client().get(
+            f"chat/findContacts/{instance_name}",
+            params={"where[name]": name},
+        )
+        if isinstance(contacts, list) and contacts:
+            return {
+                "found": True,
+                "contacts": [
+                    {
+                        "jid": c.get("id"),
+                        "name": c.get("pushName") or c.get("name"),
+                        "phone": c.get("id", "").split("@")[0],
+                    }
+                    for c in contacts
+                ],
+            }
+    except Exception:
+        pass
 
-    name_lower = name.lower()
-    matches = []
-    for chat in chats:
-        push_name = (chat.get("name") or chat.get("pushName") or "").lower()
-        jid = chat.get("id", "")
-        if name_lower in push_name:
-            matches.append({"jid": jid, "name": chat.get("name") or chat.get("pushName"), "last_message": chat.get("lastMsgTimestamp")})
+    # Fallback: search in chats by pushName
+    try:
+        chats = await get_client().get(f"chat/findChats/{instance_name}")
+        if isinstance(chats, list):
+            name_lower = name.lower()
+            matches = [
+                {
+                    "jid": c.get("id"),
+                    "name": c.get("name") or c.get("pushName"),
+                    "phone": c.get("id", "").split("@")[0],
+                    "last_message": c.get("lastMsgTimestamp"),
+                }
+                for c in chats
+                if name_lower in (c.get("name") or c.get("pushName") or "").lower()
+                and "@g.us" not in c.get("id", "")
+            ]
+            if matches:
+                return {"found": True, "contacts": matches}
+    except Exception:
+        pass
 
-    if not matches:
-        # fallback: search in recent messages pushName
-        return {"found": False, "message": f"Nenhum contato encontrado com o nome '{name}'"}
-
-    return {"found": True, "contacts": matches}
+    return {"found": False, "message": f"Nenhum contato encontrado com o nome '{name}'"}
 
 
 async def find_chats(instance_name: str) -> dict:
