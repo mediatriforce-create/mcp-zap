@@ -84,12 +84,12 @@ async def delete_instance(instance_name: str) -> dict:
     return await get_client().delete(f"instance/delete/{instance_name}")
 
 
-async def set_presence(instance_name: str, presence: str) -> dict:
-    """Set the presence status of the instance.
+async def set_instance_presence(instance_name: str, presence: str) -> dict:
+    """Set the global presence status of the WhatsApp instance (online/offline).
 
     Args:
         instance_name: Name of the instance
-        presence: Presence status. Values: available, unavailable, composing, recording, paused
+        presence: Presence status. Values: available, unavailable
     """
     return await get_client().post(
         f"instance/setPresence/{instance_name}",

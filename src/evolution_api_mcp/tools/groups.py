@@ -127,3 +127,105 @@ async def leave_group(instance_name: str, group_jid: str) -> dict:
     return await get_client().delete(
         f"group/leaveGroup/{instance_name}?groupJid={group_jid}",
     )
+
+
+async def promote_participant(
+    instance_name: str,
+    group_jid: str,
+    participants: list[str],
+) -> dict:
+    """Promote participants to admin in a WhatsApp group.
+
+    Args:
+        instance_name: Name of the connected instance
+        group_jid: Group JID (e.g. "120363000000000000@g.us")
+        participants: List of phone numbers to promote (e.g. ["5511999999999"])
+    """
+    return await get_client().put(
+        f"group/updateParticipant/{instance_name}",
+        json_data={
+            "groupJid": group_jid,
+            "action": "promote",
+            "participants": participants,
+        },
+    )
+
+
+async def demote_participant(
+    instance_name: str,
+    group_jid: str,
+    participants: list[str],
+) -> dict:
+    """Demote admin participants to regular members in a WhatsApp group.
+
+    Args:
+        instance_name: Name of the connected instance
+        group_jid: Group JID (e.g. "120363000000000000@g.us")
+        participants: List of phone numbers to demote (e.g. ["5511999999999"])
+    """
+    return await get_client().put(
+        f"group/updateParticipant/{instance_name}",
+        json_data={
+            "groupJid": group_jid,
+            "action": "demote",
+            "participants": participants,
+        },
+    )
+
+
+async def update_group_picture(instance_name: str, group_jid: str, image: str) -> dict:
+    """Update the profile picture of a WhatsApp group.
+
+    Args:
+        instance_name: Name of the connected instance
+        group_jid: Group JID (e.g. "120363000000000000@g.us")
+        image: URL or base64-encoded image (JPG/PNG, square crop recommended)
+    """
+    return await get_client().put(
+        f"group/updateGroupPicture/{instance_name}",
+        json_data={"groupJid": group_jid, "image": image},
+    )
+
+
+async def update_group_description(
+    instance_name: str,
+    group_jid: str,
+    description: str,
+) -> dict:
+    """Update the description of a WhatsApp group.
+
+    Args:
+        instance_name: Name of the connected instance
+        group_jid: Group JID (e.g. "120363000000000000@g.us")
+        description: New group description text
+    """
+    return await get_client().put(
+        f"group/updateGroupDescription/{instance_name}",
+        json_data={"groupJid": group_jid, "description": description},
+    )
+
+
+async def get_group_invite_link(instance_name: str, group_jid: str) -> dict:
+    """Get the invite link for a WhatsApp group.
+
+    Args:
+        instance_name: Name of the connected instance
+        group_jid: Group JID (e.g. "120363000000000000@g.us")
+    """
+    return await get_client().get(
+        f"group/inviteCode/{instance_name}",
+        params={"groupJid": group_jid},
+    )
+
+
+async def revoke_group_invite_link(instance_name: str, group_jid: str) -> dict:
+    """Revoke and regenerate the invite link for a WhatsApp group.
+
+    Args:
+        instance_name: Name of the connected instance
+        group_jid: Group JID (e.g. "120363000000000000@g.us")
+    """
+    return await get_client().put(
+        f"group/revokeInviteCode/{instance_name}",
+        json_data={"groupJid": group_jid},
+    )

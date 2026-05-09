@@ -347,6 +347,89 @@ async def send_list(
     )
 
 
+async def edit_message(
+    instance_name: str,
+    number: str,
+    message_id: str,
+    new_text: str,
+) -> dict:
+    """Edit a previously sent WhatsApp text message.
+
+    Args:
+        instance_name: Name of the connected instance
+        number: Phone number of the chat (with country code, e.g. "5511999999999")
+        message_id: ID of the message to edit
+        new_text: New text content to replace the original message
+    """
+    body: dict[str, Any] = {
+        "number": number,
+        "key": {"id": message_id},
+        "text": new_text,
+    }
+    return await get_client().post(
+        f"message/editMessage/{instance_name}", json_data=body
+    )
+
+
+async def forward_message(
+    instance_name: str,
+    number: str,
+    message_id: str,
+    remote_jid: str,
+    from_me: bool = False,
+) -> dict:
+    """Forward an existing WhatsApp message to another chat.
+
+    Args:
+        instance_name: Name of the connected instance
+        number: Recipient phone number to forward to (with country code)
+        message_id: ID of the message to forward
+        remote_jid: Original chat JID where the message came from
+        from_me: Whether the original message was sent by you
+    """
+    body: dict[str, Any] = {
+        "number": number,
+        "key": {
+            "id": message_id,
+            "remoteJid": remote_jid,
+            "fromMe": from_me,
+        },
+    }
+    return await get_client().post(
+        f"message/forwardMessage/{instance_name}", json_data=body
+    )
+
+
+async def pin_message(
+    instance_name: str,
+    number: str,
+    message_id: str,
+    from_me: bool = False,
+    pin_duration: int = 86400,
+) -> dict:
+    """Pin a message in a WhatsApp chat.
+
+    Args:
+        instance_name: Name of the connected instance
+        number: Phone number of the chat (with country code)
+        message_id: ID of the message to pin
+        from_me: Whether the message was sent by you
+        pin_duration: How long to pin in seconds (86400=24h, 604800=7d, 2592000=30d)
+    """
+    body: dict[str, Any] = {
+        "number": number,
+        "key": {
+            "id": message_id,
+            "remoteJid": f"{number}@s.whatsapp.net",
+            "fromMe": from_me,
+        },
+        "duration": pin_duration,
+    }
+    return await get_client().post(
+        f"message/pinMessage/{instance_name}", json_data=body
+    )
+
+
 async def send_sticker(
     instance_name: str,
     number: str,

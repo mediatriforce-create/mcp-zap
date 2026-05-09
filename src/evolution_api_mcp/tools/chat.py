@@ -208,6 +208,43 @@ async def delete_message(
     )
 
 
+async def mark_chat_unread(
+    instance_name: str,
+    remote_jid: str,
+    last_message_id: str,
+    from_me: bool = False,
+) -> dict:
+    """Mark a chat as unread.
+
+    Args:
+        instance_name: Name of the connected instance
+        remote_jid: Chat JID (e.g. "5511999999999@s.whatsapp.net")
+        last_message_id: ID of the last message in the chat
+        from_me: Whether the last message was sent by you
+    """
+    return await get_client().put(
+        f"chat/markChatUnread/{instance_name}",
+        json_data={
+            "lastMessage": {
+                "key": {
+                    "remoteJid": remote_jid,
+                    "id": last_message_id,
+                    "fromMe": from_me,
+                }
+            }
+        },
+    )
+
+
+async def list_contacts(instance_name: str) -> dict:
+    """List all contacts saved in the WhatsApp account phonebook.
+
+    Args:
+        instance_name: Name of the connected instance
+    """
+    return await get_client().get(f"chat/findContacts/{instance_name}")
+
+
 async def get_profile(instance_name: str, number: str) -> dict:
     """Get WhatsApp profile info (name, picture URL, status) of a contact.
 
