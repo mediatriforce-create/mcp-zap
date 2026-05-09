@@ -121,3 +121,101 @@ async def mark_message_as_read(
             ]
         },
     )
+
+
+async def download_media(
+    instance_name: str,
+    message_id: str,
+    remote_jid: str,
+    from_me: bool = False,
+) -> dict:
+    """Download media (image, video, audio, document) from a received WhatsApp message.
+    Returns base64-encoded content and mimetype.
+
+    Args:
+        instance_name: Name of the connected instance
+        message_id: ID of the message containing the media
+        remote_jid: Chat JID the message belongs to (e.g. "5511999999999@s.whatsapp.net")
+        from_me: Whether the message was sent by you (default False)
+    """
+    return await get_client().post(
+        f"chat/getBase64FromMediaMessage/{instance_name}",
+        json_data={
+            "message": {
+                "key": {
+                    "id": message_id,
+                    "remoteJid": remote_jid,
+                    "fromMe": from_me,
+                }
+            },
+            "convertToMp4": False,
+        },
+    )
+
+
+async def check_number(instance_name: str, number: str) -> dict:
+    """Check if a phone number exists on WhatsApp before sending a message.
+
+    Args:
+        instance_name: Name of the connected instance
+        number: Phone number with country code (e.g. "5511999999999")
+    """
+    return await get_client().get(
+        f"chat/whatsappNumbers/{instance_name}",
+        params={"numbers": number},
+    )
+
+
+async def set_presence(
+    instance_name: str,
+    number: str,
+    presence: str = "composing",
+    delay: int = 2000,
+) -> dict:
+    """Set presence status in a chat (e.g. show 'typing...' before sending a message).
+
+    Args:
+        instance_name: Name of the connected instance
+        number: Recipient phone number with country code (e.g. "5511999999999")
+        presence: Presence type. Values: composing (typing), recording (audio), paused, available, unavailable
+        delay: Duration in milliseconds to show the presence (default 2000)
+    """
+    return await get_client().post(
+        f"chat/sendPresence/{instance_name}",
+        json_data={
+            "number": number,
+            "options": {"presence": presence, "delay": delay},
+        },
+    )
+
+
+async def delete_message(
+    instance_name: str,
+    remote_jid: str,
+    message_id: str,
+    from_me: bool = True,
+) -> dict:
+    """Delete a sent WhatsApp message (delete for everyone).
+
+    Args:
+        instance_name: Name of the connected instance
+        remote_jid: Chat JID (e.g. "5511999999999@s.whatsapp.net")
+        message_id: ID of the message to delete
+        from_me: Whether the message was sent by you (default True)
+    """
+    return await get_client().delete(
+        f"chat/deleteMessageForEveryone/{instance_name}/{remote_jid}/{message_id}/{str(from_me).lower()}",
+    )
+
+
+async def get_profile(instance_name: str, number: str) -> dict:
+    """Get WhatsApp profile info (name, picture URL, status) of a contact.
+
+    Args:
+        instance_name: Name of the connected instance
+        number: Phone number with country code (e.g. "5511999999999")
+    """
+    return await get_client().get(
+        f"chat/fetchProfile/{instance_name}",
+        params={"number": number},
+    )
