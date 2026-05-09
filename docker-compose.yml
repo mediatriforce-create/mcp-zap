@@ -18,6 +18,11 @@ services:
       LOG_BAILEYS: "error"
       CONFIG_SESSION_PHONE_CLIENT: "Evolution API"
       CONFIG_SESSION_PHONE_NAME: "Chrome"
+      TZ: America/Sao_Paulo
+      STORE_MESSAGES: "true"
+      STORE_MESSAGE_UP: "true"
+      STORE_CONTACTS: "true"
+      STORE_CHATS: "true"
 
 volumes:
   evolution_instances:
