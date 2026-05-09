@@ -347,6 +347,34 @@ async def send_list(
     )
 
 
+async def send_broadcast(
+    instance_name: str,
+    numbers: list[str],
+    text: str,
+    delay: int = 1500,
+) -> dict:
+    """Send the same text message to multiple WhatsApp numbers at once (broadcast).
+
+    Args:
+        instance_name: Name of the connected instance
+        numbers: List of phone numbers with country code (e.g. ["5511999999999", "5521888888888"])
+        text: Message text to send to all recipients
+        delay: Delay in milliseconds between each message to avoid spam detection (default 1500)
+    """
+    results = []
+    for number in numbers:
+        result = await get_client().post(
+            f"message/sendText/{instance_name}",
+            json_data={
+                "number": number,
+                "textMessage": {"text": text},
+                "options": {"delay": delay},
+            },
+        )
+        results.append({"number": number, "result": result})
+    return {"sent": len(results), "results": results}
+
+
 async def edit_message(
     instance_name: str,
     number: str,

@@ -218,6 +218,20 @@ async def get_group_invite_link(instance_name: str, group_jid: str) -> dict:
     )
 
 
+async def join_group_via_link(instance_name: str, invite_link: str) -> dict:
+    """Join a WhatsApp group using an invite link.
+
+    Args:
+        instance_name: Name of the connected instance
+        invite_link: WhatsApp group invite link (e.g. "https://chat.whatsapp.com/XXXXXX")
+    """
+    invite_code = invite_link.split("/")[-1]
+    return await get_client().post(
+        f"group/acceptInviteCode/{instance_name}",
+        json_data={"inviteCode": invite_code},
+    )
+
+
 async def revoke_group_invite_link(instance_name: str, group_jid: str) -> dict:
     """Revoke and regenerate the invite link for a WhatsApp group.
 

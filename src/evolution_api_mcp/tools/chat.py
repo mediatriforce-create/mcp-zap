@@ -236,6 +236,24 @@ async def mark_chat_unread(
     )
 
 
+async def mute_chat(
+    instance_name: str,
+    remote_jid: str,
+    mute_duration: str = "8HOURS",
+) -> dict:
+    """Mute notifications for a WhatsApp chat.
+
+    Args:
+        instance_name: Name of the connected instance
+        remote_jid: Chat JID (e.g. "5511999999999@s.whatsapp.net")
+        mute_duration: How long to mute. Values: 8HOURS, 1WEEK, ALWAYS
+    """
+    return await get_client().post(
+        f"chat/muteChat/{instance_name}",
+        json_data={"chatJid": remote_jid, "mute": mute_duration},
+    )
+
+
 async def list_contacts(instance_name: str) -> dict:
     """List all contacts saved in the WhatsApp account phonebook.
 
