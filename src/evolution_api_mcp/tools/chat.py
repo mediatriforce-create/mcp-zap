@@ -5,6 +5,32 @@ from typing import Any
 from evolution_api_mcp.client import get_client
 
 
+async def find_contact(instance_name: str, name: str) -> dict:
+    """Search for a WhatsApp contact by name and return their JID (phone number).
+
+    Args:
+        instance_name: Name of the connected instance
+        name: Full or partial name to search (case-insensitive)
+    """
+    chats = await get_client().get(f"chat/findChats/{instance_name}")
+    if not isinstance(chats, list):
+        return {"error": "Could not fetch chats"}
+
+    name_lower = name.lower()
+    matches = []
+    for chat in chats:
+        push_name = (chat.get("name") or chat.get("pushName") or "").lower()
+        jid = chat.get("id", "")
+        if name_lower in push_name:
+            matches.append({"jid": jid, "name": chat.get("name") or chat.get("pushName"), "last_message": chat.get("lastMsgTimestamp")})
+
+    if not matches:
+        # fallback: search in recent messages pushName
+        return {"found": False, "message": f"Nenhum contato encontrado com o nome '{name}'"}
+
+    return {"found": True, "contacts": matches}
+
+
 async def find_chats(instance_name: str) -> dict:
     """List all chats/conversations of the connected WhatsApp account.
 
